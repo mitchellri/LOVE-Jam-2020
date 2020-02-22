@@ -1,25 +1,29 @@
-local objects = {}
+local base = require("base")
+local objects = setmetatable({}, {__index = base})
 
--- Callback
-
+--[[ Callback ]]
 function objects:update(dt)
-  for index, object in ipairs(objects) do
+  local index, object
+  for index, object in ipairs(self) do
     object:update(dt)
   end
 end
 
 function objects:draw()
-  for index, object in ipairs(objects) do
-    love.graphics.circle("fill", object.body:getX(world), object.body:getY(), object.shape:getRadius())
+  local index, object, world
+  for index, object in ipairs(self) do
+    world = object.body:getWorld()
+    love.graphics.circle("fill", object.body:getX(world), object.body:getY(world), object.shape:getRadius())
   end
 end
 
--- Objects
-
+--[[ Objects ]]
 function objects.baseObject()
   local o = {}
+  o.destroy = false
+  o.spawned = 0
   function o:update(dt)
-
+    self.spawned = self.spawned + dt
   end
   return o
 end

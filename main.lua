@@ -1,17 +1,34 @@
--- LIBRARIES
-local objects = require("objects")
-local world
+local time = 0
 
--- LOVE
+--[[ Components ]]
+local main = {}
+main.game = require("game")
+
+--[[ Callback ]]
 function love.load()
-  world = love.physics.newWorld(0, 9.81 * 64, true)
+  local index, object
+  for index, object in pairs(main) do
+    if type(object) == "table" then
+      object:load()
+    end
+  end
 end
 
 function love.update(dt)
-  world:update(dt)
-  objects:update(dt)
+  local index, object
+  time = time + dt
+  for index, object in pairs(main) do
+    if type(object) ~= "function" then
+      object:update(dt)
+    end
+  end
 end
 
 function love.draw()
-  objects:draw()
+  local index, object
+  for index, object in pairs(main) do
+    if type(object) == "table" then
+      object:draw()
+    end
+  end
 end
