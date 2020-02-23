@@ -13,9 +13,10 @@ function game:load()
       object:load()
     end
   end
-  game.objects:circle(game.world)
-  game.terrain.x = game.objects[1].body:getWorldPoint(game.objects[1].shape:getPoint())
-  game.terrain.world = game.world
+  self.world:setCallbacks(self.beginContact, self.endContact, self.preSolve, self.postSolve)
+  self.objects:circle(self.world)
+  self.terrain.x = self.objects[1].fixture:getBody():getWorldPoint(self.objects[1].shape:getPoint())
+  self.terrain.world = self.world
 end
 
 function game:update(dt)
@@ -25,8 +26,8 @@ function game:update(dt)
       object:update(dt)
     end
   end
-  game.terrain.x = game.objects[1].body:getWorldPoint(game.objects[1].shape:getPoint())
-  camera:follow(game.objects[1].body, dt)
+  self.terrain.x = self.objects[1].fixture:getBody():getWorldPoint(self.objects[1].shape:getPoint())
+  camera:follow(self.objects[1].fixture:getBody(), dt)
 end
 
 function game:draw()
@@ -39,5 +40,45 @@ function game:draw()
   end
   camera:unset()
 end
+
+function game:mousepressed(x, y, button, isTouch, presses)
+  local index, object
+  x, y = camera:screenToLocal(x, y)
+  print("Click", x, y)
+  for index, object in pairs(self) do
+    if type(object) == "table" then
+      object:mousepressed(x, y, button, isTouch, presses)
+    end
+  end
+  if (button == 1) then
+    self.objects:waterCircle(self.world, x, y)
+  end
+end
+
+--[[ Collision ]]
+function game.beginContact(a, b, col)
+  a = a:getUserData()
+  b = b:getUserData()
+  --[[a:beginContact(b, col)
+  b:beginContact(a, col)]]
+end
+--[[function game.endContact(a, b, col)
+  a = a:getUserData()
+  b = b:getUserData()
+  a:endContact(b, col)
+  b:endContact(a, col)
+end
+function game.preSolve(a, b, col)
+  a = a:getUserData()
+  b = b:getUserData()
+  a:preSolve(b, col)
+  b:preSolve(a, col)
+end
+function game.postSolve(a, b, col, normalImpulse, tangentImpulse)
+  a = a:getUserData()
+  b = b:getUserData()
+  a:postSolve(b, col, normalImpulse, tangentImpulse)
+  b:postSolve(a, col, normalImpulse, tangentImpulse)
+end]]
 
 return game

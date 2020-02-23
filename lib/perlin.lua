@@ -5,9 +5,9 @@
 
 perlin = {}
 perlin.p = {}
-perlin.amplitude = 1.5
-perlin.lacunarity = 2
-perlin.gain = 0.5
+perlin.amplitude = 0.5
+perlin.lacunarity = 0.5
+perlin.gain = 0.75
 perlin.octaves = 8
 perlin.frequency = 1/175
 

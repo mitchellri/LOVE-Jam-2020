@@ -32,3 +32,12 @@ function love.draw()
     end
   end
 end
+
+function love.mousepressed(x, y, button, isTouch, presses)
+  local index, object
+  for index, object in pairs(main) do
+    if type(object) == "table" then
+      object:mousepressed(x, y, button, isTouch, presses)
+    end
+  end
+end

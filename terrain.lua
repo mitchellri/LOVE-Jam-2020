@@ -1,4 +1,5 @@
 local base = require("base")
+local objects = require("objects")
 local terrain = setmetatable({}, {__index = base})
 terrain.x = 0
 terrain.world = nil
@@ -53,26 +54,19 @@ function terrain:draw()
   for chunkIndex = firstChunk, lastChunk do
     if self.lines[chunkIndex] ~= nil then
       for index, object in ipairs(self.lines[chunkIndex]) do
-        --love.graphics.line(object.body:getWorldPoints(object.shape:getPoints()))
-        for _, point in ipairs({object.body:getWorldPoints(object.shape:getPoints())}) do
-          table.insert(points, point)
-        end
-
         if index == 1 then -- Debug
           love.graphics.setColor(1, 0, 0)
         else
           love.graphics.setColor(0.5, 0.5, 0.5)
         end
-        love.graphics.line(object.body:getX(), object.body:getY(), object.body:getX(), -500)
+        love.graphics.line(object.fixture:getBody():getX(), object.fixture:getBody():getY(), object.fixture:getBody():getX(), -500)
         love.graphics.setColor(1, 1, 1)
 
+        object:draw()
       end
     elseif lastDrawChunk ~= chunk then -- Debug
       print("Cannot draw nil chunk", chunk)
     end
-  end
-  if table.getn(points) > 4 then
-    love.graphics.line(unpack(points))
   end
 
   lastDrawChunk = chunk -- Debug
@@ -128,23 +122,19 @@ function terrain:generateLinesAt(chunk)
     print("Invalid chunk")
     return
   end
-  local x = (chunk - 1)  * self.chunkSize
   local index, object
   local lastObject, lastIndex
   local from, to
-  local localFrom, localLastObject, localTo, localObject
   for index, object in ipairs(self[chunk]) do
     if index > 1 then
       if self.lines[chunk] == nil then self.lines[chunk] = {} end
       if self.lines[chunk][lastIndex] == nil then
         from = (lastIndex + (chunk - 1) * self.minimumVerticesPerChunk) * self.spacing - self.spacing -- Do not use minimumVerticesPerChunk
         to = (index + (chunk - 1) * self.minimumVerticesPerChunk) * self.spacing - self.spacing -- Do not use minimumVerticesPerChunk
-        table.insert(self.lines[chunk], lastIndex, {})
-        self.lines[chunk][lastIndex].body = love.physics.newBody(self.world, from, lastObject, "static")
-        localFrom, localLastObject = self.lines[chunk][lastIndex].body:getLocalPoint(from, lastObject)
-        localTo, localObject = self.lines[chunk][lastIndex].body:getLocalPoint(to, object)
-        self.lines[chunk][lastIndex].shape = love.physics.newEdgeShape(localFrom, localLastObject, localTo, localObject)
-        self.lines[chunk][lastIndex].fixture = love.physics.newFixture(self.lines[chunk][lastIndex].body, self.lines[chunk][lastIndex].shape, 1)
+        table.insert(self.lines[chunk], lastIndex,
+          self:terrainLine(self.world, from, lastObject, to, object)
+        )
+
         print("Line", from, to,
           "Chunk", chunk,
           "Index", lastIndex,
@@ -156,6 +146,28 @@ function terrain:generateLinesAt(chunk)
     lastIndex = index
     lastObject = object
   end
+end
+
+function terrain:terrainLine(world, x1, y1, x2, y2)
+  local o = objects:baseObject()
+  local body = love.physics.newBody(world, x1, y1, "static")
+  x1, y1 = body:getLocalPoint(x1, y1)
+  x2, y2 = body:getLocalPoint(x2, y2)
+  o.shape = love.physics.newEdgeShape(x1, y1, x2, y2)
+  o.fixture = love.physics.newFixture(body, o.shape, 1)
+  o.fixture:setUserData(o)
+
+  function o:draw()
+    local points = {}
+    for _, point in ipairs({self.fixture:getBody():getWorldPoints(self.shape:getPoints())}) do
+      table.insert(points, point)
+    end
+    if table.getn(points) >= 4 then
+      love.graphics.line(unpack(points))
+    end
+  end
+
+  return o
 end
 
 return terrain

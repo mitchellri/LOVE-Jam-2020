@@ -43,7 +43,10 @@ function camera:setScale(sx, sy)
 end
 
 function camera:follow(body,dt)
-
 	camera:move(-(camera.x - (body:getX() - love.graphics.getWidth() / (2/camera.scaleX))) * dt * camera.speed)
 	camera:move(0,-(camera.y - (body:getY() - love.graphics.getHeight() / (2/camera.scaleY))) * dt * camera.speed)
+end
+
+function camera:screenToLocal(x, y)
+	return self.x + x, self.y + y
 end
