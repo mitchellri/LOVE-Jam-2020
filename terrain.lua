@@ -149,7 +149,7 @@ function terrain:generateLinesAt(chunk)
 end
 
 function terrain:terrainLine(world, x1, y1, x2, y2)
-  local o = objects:baseObject()
+  local o = setmetatable({}, {__index = objects.baseObject()})
   local body = love.physics.newBody(world, x1, y1, "static")
   x1, y1 = body:getLocalPoint(x1, y1)
   x2, y2 = body:getLocalPoint(x2, y2)

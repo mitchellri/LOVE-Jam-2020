@@ -59,10 +59,10 @@ end
 function game.beginContact(a, b, col)
   a = a:getUserData()
   b = b:getUserData()
-  --[[a:beginContact(b, col)
-  b:beginContact(a, col)]]
+  a:beginContact(b, col)
+  b:beginContact(a, col)
 end
---[[function game.endContact(a, b, col)
+function game.endContact(a, b, col)
   a = a:getUserData()
   b = b:getUserData()
   a:endContact(b, col)
@@ -79,6 +79,6 @@ function game.postSolve(a, b, col, normalImpulse, tangentImpulse)
   b = b:getUserData()
   a:postSolve(b, col, normalImpulse, tangentImpulse)
   b:postSolve(a, col, normalImpulse, tangentImpulse)
-end]]
+end
 
 return game
