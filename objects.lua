@@ -24,6 +24,7 @@ function objects.baseObject()
   local o = {}
   o.velocityMod = 1
   o.spawned = 0
+  o.color = {1, 1, 1, 1}
   --[[ Callback ]]
   function o:update(dt)
     self.spawned = self.spawned + dt
@@ -52,13 +53,36 @@ function objects:waterCircle(world, x, y)
   o.fixture:setUserData(o)
   o.fixture:setMask(properties.water)
 
+  o.color = {0, 0.5, 1, 0.8}
+
+  o.radiusChangeDirection = 1
+  o.radiusRange = o.shape:getRadius()
+  o.radiusChangeStep = o.radiusRange / 2
+  o.radiusVelocityMod = 0.1
+  o.radiusMod = 0
+  function o:update(dt)
+    local x, y = self.fixture:getBody():getLinearVelocity()
+    local newRadius = self.radiusMod + self.radiusChangeStep * self.radiusChangeDirection * (dt + math.max(math.abs(x), math.abs(y)) * self.radiusVelocityMod * dt)
+    while newRadius > self.radiusRange or newRadius < 0 do
+      if newRadius > self.radiusRange then
+        newRadius = self.radiusRange - newRadius % self.radiusRange * self.radiusChangeDirection
+        self.radiusChangeDirection = - self.radiusChangeDirection
+      end
+      if newRadius < 0 then
+        newRadius = math.abs(newRadius)
+        self.radiusChangeDirection = - self.radiusChangeDirection
+      end
+    end
+    self.radiusMod = newRadius
+  end
+
   function o:draw()
     local world, x, y
     world = self.fixture:getBody():getWorld()
     x, y = self.fixture:getBody():getWorldPoint(self.shape:getPoint(world))
-    love.graphics.setColor(0,0.5,1)
-    love.graphics.circle("fill", x, y, self.shape:getRadius())
-    love.graphics.setColor(1,1,1)
+    love.graphics.setColor(unpack(self.color))
+    love.graphics.circle("fill", x, y, self.shape:getRadius() + self.radiusMod)
+    love.graphics.setColor(1, 1, 1)
   end
 
   function o:preSolve(object, col)
@@ -125,8 +149,8 @@ function objects:circle(world)
       force = 500 * self.velocityMod
       if love.keyboard.isDown("right") then self.fixture:getBody():applyForce(force, 0) end
       if love.keyboard.isDown("left") and x > 0 then self.fixture:getBody():applyForce(-force, 0) end
-      if love.keyboard.isDown("up") then self.fixture:getBody():applyForce(0, -force) end
-      if love.keyboard.isDown("down") then self.fixture:getBody():applyForce(0, force) end
+      --[[if love.keyboard.isDown("up") then self.fixture:getBody():applyForce(0, -force) end -- Debug
+      if love.keyboard.isDown("down") then self.fixture:getBody():applyForce(0, force) end]]
     end
     objects:baseObject().update(self,dt)
   end
@@ -134,8 +158,7 @@ function objects:circle(world)
     local world = self.fixture:getBody():getWorld()
     local x, y = self.fixture:getBody():getWorldPoint(self.shape:getPoint(world))
     love.graphics.circle("fill", x, y, self.shape:getRadius())
-    love.graphics.print(self.velocityMod, x, y + 40)
-    love.graphics.print(x ..","..y, x, y + 20)
+    --love.graphics.print(x ..","..y, x, y + 20)
   end
 
   table.insert(objects,o)

@@ -4,7 +4,7 @@ local terrain = setmetatable({}, {__index = base})
 terrain.x = 0
 terrain.world = nil
 terrain.chunkSize = 1000 -- Do not change after startup
-terrain.spacing = 10 -- Do not change after startup
+terrain.spacing = 25 -- Do not change after startup
 terrain.scale = 25 -- Do not change after startup
 terrain.halfDrawRange = 2
 terrain.minimumVerticesPerChunk = terrain.chunkSize / terrain.spacing
@@ -13,6 +13,7 @@ local perlin = require("lib/perlin")
 local lastDrawChunk = nil
 local lastUpdateChunk = nil
 local flag = false
+local backgroundLineColor = {0.4, 0.5, 0.6}
 
 --[[ Callback ]]
 function terrain:update()
@@ -54,11 +55,7 @@ function terrain:draw()
   for chunkIndex = firstChunk, lastChunk do
     if self.lines[chunkIndex] ~= nil then
       for index, object in ipairs(self.lines[chunkIndex]) do
-        if index == 1 then -- Debug
-          love.graphics.setColor(1, 0, 0)
-        else
-          love.graphics.setColor(0.5, 0.5, 0.5)
-        end
+        love.graphics.setColor(unpack(backgroundLineColor)) -- Debug / background
         love.graphics.line(object.fixture:getBody():getX(), object.fixture:getBody():getY(), object.fixture:getBody():getX(), -500)
         love.graphics.setColor(1, 1, 1)
 
@@ -157,13 +154,16 @@ function terrain:terrainLine(world, x1, y1, x2, y2)
   o.fixture = love.physics.newFixture(body, o.shape, 1)
   o.fixture:setUserData(o)
 
+  o.color = {0.4, 1, 0.4, 1}
   function o:draw()
     local points = {}
     for _, point in ipairs({self.fixture:getBody():getWorldPoints(self.shape:getPoints())}) do
       table.insert(points, point)
     end
     if table.getn(points) >= 4 then
+      love.graphics.setColor(unpack(self.color))
       love.graphics.line(unpack(points))
+      love.graphics.setColor(1,1,1,1)
     end
   end
 
