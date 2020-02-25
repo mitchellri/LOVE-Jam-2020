@@ -4,12 +4,11 @@ local terrain = setmetatable({}, {__index = base})
 terrain.x = 0
 terrain.world = nil
 terrain.lines = {}
-local perlin = require("lib/perlin")
-perlin = setmetatable({}, {__index = perlin})
+terrain.perlin = setmetatable({}, {__index = require("lib/perlin")})
 local flag = false
 
 --[[ Callback ]]
-function terrain:updateChunk(chunk, dt)
+function terrain:generateChunk(chunk, dt)
   self:generateVerticesAt(chunk)
   self:generateLinesAt(chunk)
 end
@@ -46,11 +45,11 @@ function terrain:setVertex(x, chunk)
   if self[chunk] == nil then self[chunk] = {} end
   local index = self:getChunkIndex(x, chunk)
   if self[chunk][index] ~= nil then return end
-  table.insert(self[chunk], index, perlin:fbm(x) * self.scale)
-  print("Vertex", x, self[chunk],
+  table.insert(self[chunk], index, self.perlin:fbm(x) * self.scale)
+  --[[print("Vertex", x,
     "Chunk", chunk,
     "Index", index,
-    "getn", table.getn(self[chunk]))
+    "getn", table.getn(self[chunk]))]]
 end
 
 function terrain:generateLinesAt(chunk)
@@ -69,10 +68,10 @@ function terrain:generateLinesAt(chunk)
         table.insert(self.lines[chunk], lastIndex,
           self:terrainLine(self.world, from, lastObject, to, object)
         )
-        print("Line", from, to,
+        --[[print("Line", from, to,
           "Chunk", chunk,
           "Index", lastIndex,
-          "getn", table.getn(self.lines[chunk]))
+          "getn", table.getn(self.lines[chunk]))]]
       end
     end
     lastIndex = index

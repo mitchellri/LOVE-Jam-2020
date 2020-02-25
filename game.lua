@@ -2,6 +2,7 @@ local base = require("base")
 local game = setmetatable({}, {__index = base})
 game.objects = require("objects")
 game.terrain = require("terrain")
+game.rain = require("rain")
 game.world = love.physics.newWorld(0, 9.81 * 64, true)
 require('lib/camera')
 
@@ -13,10 +14,11 @@ function game:load()
       object:load()
     end
   end
-  self.world:setCallbacks(self.beginContact, self.endContact, self.preSolve, self.postSolve)
+  self.world:setCallbacks(self.beginContact, self.endContact, self.preSolve, self.postSolve)--
   self.objects:circle(self.world)
   self.terrain.x = self.objects[1].fixture:getBody():getWorldPoint(self.objects[1].shape:getPoint())
   self.terrain.world = self.world
+  self.rain.world = self.world
 end
 
 function game:update(dt)
@@ -27,6 +29,7 @@ function game:update(dt)
     end
   end
   self.terrain.x = self.objects[1].fixture:getBody():getWorldPoint(self.objects[1].shape:getPoint())
+  self.rain.x = self.objects[1].fixture:getBody():getWorldPoint(self.objects[1].shape:getPoint())
   camera:follow(self.objects[1].fixture:getBody(), dt)
 end
 

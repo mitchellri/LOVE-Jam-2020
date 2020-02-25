@@ -130,7 +130,7 @@ end
 
 function objects:circle(world)
   local o = setmetatable({}, {__index = objects.baseObject()})
-  local body = love.physics.newBody(world, 0, 0, "dynamic")
+  local body = love.physics.newBody(world, 500, -500, "dynamic")
   o.shape = love.physics.newCircleShape(10)
   o.fixture = love.physics.newFixture(body, o.shape, 0)
   o.fixture:setUserData(o)

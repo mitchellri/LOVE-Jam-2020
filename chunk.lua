@@ -13,8 +13,12 @@ function chunk:update(dt)
 
  local chunkIndex
  for chunkIndex = chunk - self.halfDrawRange, chunk + self.halfDrawRange do
-   if self[chunkIndex] == nil and chunkIndex > 0 then
-     self:updateChunk(chunkIndex, dt)
+   if chunkIndex > 0 then
+     if self[chunkIndex] ~= nil then
+       self:updateChunk(chunkIndex, dt)
+     else
+       self:generateChunk(chunkIndex, dt)
+     end
    end
  end
 end

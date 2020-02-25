@@ -10,6 +10,7 @@ perlin.lacunarity = 0.5
 perlin.gain = 0.75
 perlin.octaves = 8
 perlin.frequency = 1/175
+perlin.seed = love.math.random(255)
 
 -- Hash lookup table as defined by Ken Perlin
 -- This is a randomly arranged array of all numbers from 0-255 inclusive
@@ -38,8 +39,9 @@ end
 
 -- Return range: [-1, 1]
 function perlin:noise(x, y, z)
-    y = y or 0
-    z = z or 0
+    x = x + self.seed
+    y = (y or 0) + self.seed
+    z = (z or 0) + self.seed
 
     -- Calculate the "unit cube" that the point asked will be located in
     local xi = bit.band(math.floor(x),255)
